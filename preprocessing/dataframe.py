@@ -1,5 +1,5 @@
 import pandas as pd
-from preprocessing.swift import max_activation
+from preprocessing.swift_2 import max_activation
 
 
 def process_df(df):

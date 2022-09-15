@@ -101,13 +101,17 @@ def activation_change(current_processed, word_complete, difficulty, word_pos, wo
 
 
 """
-Saccard Programming
+Saccade Programming
 """
 
 
-def saccard_target_selection(current_processed):
+def saccade_target_selection(current_processed):
     return current_processed / np.sum(current_processed)
 
 
-def check_for_saccard(t, prev_saccard, delta, activation):
-    return t > prev_saccard + delta + inhibition_factor_h * activation
+def get_saccade_delta():
+    return 0
+
+
+def check_for_saccade(t, prev_saccade, saccade_delta, activation):
+    return t > prev_saccade + saccade_delta + inhibition_factor_h * activation
