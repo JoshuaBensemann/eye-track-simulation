@@ -1,5 +1,7 @@
 import numpy as np
 
+from models.utils import get_random_time, calculate_integral
+
 """
 Swift-2 Constants
 """
@@ -10,6 +12,12 @@ global_decay_w = 0.01
 preprocess_factor_f = 70.2
 processing_noise = 2
 inhibition_factor_h = 2.62
+random_timing = 179.0
+labile_stage = 108.0
+nonlabile_stage = 6.1
+time_delay = 375.7
+execution_time = 25.0
+suppression_delay = 50
 lambda_0 = np.sqrt(2 / np.pi) * 1 / (vis_span_l + vis_span_r)  # Equation 5
 
 """
@@ -105,13 +113,47 @@ Saccade Programming
 """
 
 
-def saccade_target_selection(current_processed):
-    return current_processed / np.sum(current_processed)
+def saccade_target_selection(current_activations):
+    probs = current_activations / np.sum(current_activations)
+    target = np.random.choice(current_activations.shape[0], p=probs)
+    return target
+
+
+def calculate_post_saccade_k(k, target_pos):
+    return target_pos[0]
 
 
 def get_saccade_delta():
-    return 0
+    return get_random_time(random_timing)[0]
 
 
-def check_for_saccade(t, prev_saccade, saccade_delta, activation):
-    return t > prev_saccade + saccade_delta + inhibition_factor_h * activation
+def calculate_activation_integral(y, timestamp, timestep):
+    upper_range = int((timestamp - time_delay) / timestep)
+
+    if upper_range <= 0:
+        return 0
+
+    activation_integral = calculate_integral(y[:upper_range + 1], dx=timestep)
+    return activation_integral / time_delay
+
+
+def check_for_labile_start(t, prev_saccade, saccade_delta, activation_integral):
+    return t > prev_saccade + saccade_delta + inhibition_factor_h * activation_integral
+
+
+def start_labile_stage():
+    return get_random_time(labile_stage)[0]
+
+
+def start_nonlabile_stage(current_activations):
+    target = saccade_target_selection(current_activations)
+    timer = get_random_time(nonlabile_stage)[0]
+
+    return target, timer
+
+
+def start_saccade_execution(k, target_pos):
+    timer = get_random_time(execution_time)
+    post_saccade_k = calculate_post_saccade_k(k, target_pos)
+
+    return post_saccade_k, timer, suppression_delay
