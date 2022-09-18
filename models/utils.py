@@ -3,7 +3,11 @@ from scipy.integrate import trapezoid
 
 
 def find_fixated_word(k, word_pos):
-    assert k <= word_pos[-1, 1]
+    if k < 0:
+        return -1
+
+    if k >= word_pos[-1, 1]:
+        return word_pos.shape[0]
 
     for i in range(word_pos.shape[0]):
         if (k >= word_pos[i, 0] - 1) and (k <= word_pos[i, 1]):
@@ -15,7 +19,7 @@ def find_word_centre(word_pos):
 
 
 def get_random_time(ave, samples=1):
-    return np.random.gamma(ave, size=1)
+    return np.random.gamma(ave, size=samples)
 
 
 def calculate_integral(y, dx=1):

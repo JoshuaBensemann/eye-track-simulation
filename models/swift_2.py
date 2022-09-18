@@ -132,7 +132,12 @@ Saccade Programming
 
 def saccade_target_selection(current_activations):
     probs = current_activations / np.sum(current_activations)
-    target = np.random.choice(current_activations.shape[0], p=probs)
+
+    try:
+        target = np.random.choice(current_activations.shape[0], p=probs)
+    except ValueError:
+        target = current_activations.shape[0]
+
     return target
 
 
@@ -155,7 +160,7 @@ def calculate_saccade_amplitude(k, target_pos, refix):
             saccade_range_err = regression_range_err
 
     range_error = saccade_err * (saccade_range_err - abs(intended_amplitude))
-    range_error_std = saccade_gaussian_err + saccade_random_err * abs(intended_amplitude)
+    range_error_std = np.sqrt(saccade_gaussian_err + saccade_random_err * abs(intended_amplitude))
     random_error = np.random.normal(0, range_error_std, 1)
     actual_amplitude = intended_amplitude + range_error + random_error[0]
 
@@ -188,7 +193,12 @@ def start_labile_stage():
 
 def start_nonlabile_stage(current_activations, k, word_pos, current_word):
     target_word = saccade_target_selection(current_activations)
-    target_pos = find_word_centre(word_pos[target_word, :])
+
+    if target_word == word_pos.shape[0]:
+        target_pos = word_pos[-1, 1] + 1
+    else:
+        target_pos = find_word_centre(word_pos[target_word, :])
+
     refix = target_word == current_word
 
     actual_amplitude, post_saccade_k = calculate_saccade_amplitude(k, target_pos, refix)

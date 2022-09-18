@@ -16,7 +16,7 @@ def metadata_step(trial_id, i, k, word_pos):
     timestamp = i * time_step
     fixated_word = find_fixated_word(k, word_pos)
 
-    return np.array((trial_id, timestamp, k, fixated_word), dtype="int")
+    return np.array((trial_id, timestamp, k, fixated_word, 0))
 
 
 def trial_step(current_processed, k, word_complete, difficulty, word_pos, word_prob, suppression):
@@ -44,8 +44,9 @@ def nonlabile_step(time_stamp, current_activations, k, word_pos, current_word):
 
 def saccade_step(time_stamp, word_pos, k, current_word, target_word):
     execution_timer, suppression_delay = start_saccade_execution()
+    execution_timer = execution_timer + time_stamp
     suppression_start = time_stamp + suppression_delay
-    suppression_stop = time_stamp + execution_timer + suppression_delay
+    suppression_stop = execution_timer + suppression_delay
 
     return execution_timer, suppression_start, suppression_stop
 
@@ -60,9 +61,17 @@ def post_saccade_step(time_stamp, post_saccade_k, target_word, word_pos):
     nonlabile_timer = 0
     execution_timer = 0
     k = post_saccade_k
-    prev_saccade_t = time_step
+    prev_saccade_t = time_stamp
 
     return saccade_delta, labile_timer, nonlabile_timer, execution_timer, k, prev_saccade_t
+
+
+def check_for_trial_end(word_complete, word_prob):
+    for i in range(word_complete.shape[0]):
+        if word_complete[i] == 0 and word_prob[i] < 1:
+            return False
+
+    return True
 
 
 def run(trial_id, df):
@@ -81,40 +90,50 @@ def run(trial_id, df):
     k = find_word_centre(word_pos[target_word, :])
 
     trial = np.zeros((simulation_steps, num_words))
-    meta_data = np.zeros((simulation_steps, 4), dtype="int")  # trial_id, time_stamp, k, fixated_word
+    meta_data = np.zeros((simulation_steps, 5))  # trial_id, time_stamp, k, fixated_word, event
 
-    meta_data[0, :] = np.array((trial_id, 0, k, 0), dtype="int")
+    meta_data[0, :] = np.array((trial_id, 0, k, 0, 0))
 
     for i in range(1, simulation_steps):
         time_stamp = i * time_step
 
-        meta_data[i, :] = metadata_step(trial_id, time_stamp, k, word_pos)
-        current_word = meta_data[i, 3]
+        meta_data[i, :] = metadata_step(trial_id, i, k, word_pos)
+        current_word = int(meta_data[i, 3])
 
         suppression = suppression_start <= time_stamp <= suppression_stop
         word_complete, trial[i, :] = trial_step(trial[i - 1, :], k, word_complete, difficulty, word_pos, word_prob,
                                                 suppression)
 
         if nonlabile_timer == 0:  # at point of no return if > 0
-            activation_integral = calculate_activation_integral(trial[:i + 1, current_word], time_stamp, time_step)
+            if current_word == -1 or current_word == word_pos.shape[0]:
+                activation_integral = 0
+            else:
+                activation_integral = calculate_activation_integral(trial[:i + 1, current_word], time_stamp, time_step)
 
             if check_for_labile_start(time_stamp, prev_saccade_t, saccade_delta, activation_integral):
                 labile_timer, prev_saccade_t, saccade_delta = labile_step(time_stamp)
+                meta_data[i, 4] = 1  # started labile phase
 
-            if time_stamp <= labile_timer:
+            if time_stamp >= labile_timer > 0:
                 target_word, nonlabile_timer, post_saccade_k = nonlabile_step(time_stamp, trial[i, :],
                                                                               k, word_pos, current_word)
+                meta_data[i, 4] = 2  # started nonlabile phase
 
         else:
-            if time_stamp <= nonlabile_timer and execution_timer == 0:
+            if time_stamp >= nonlabile_timer and execution_timer == 0:
                 execution_timer, suppression_start, suppression_stop = \
                     saccade_step(time_stamp, word_pos, k, current_word, target_word)
+                meta_data[i, 4] = 3 # started saccade
 
-            if time_stamp >= execution_timer:
+            if time_stamp >= execution_timer > 0:
                 saccade_delta, labile_timer, nonlabile_timer, execution_timer, k, prev_saccade_t = \
                     post_saccade_step(time_stamp, post_saccade_k, target_word, word_pos)
+                meta_data[i, 4] = 4 # end of saccade
+                if check_for_trial_end(word_complete, word_prob):
+                    break
 
-    return np.concatenate([meta_data, trial], axis=1)
+    full_data = np.concatenate([meta_data, trial], axis=1)
+    return full_data[:i+1, :]
 
 
 def test():
@@ -123,7 +142,8 @@ def test():
 
     test_data = process_df(test_data)
 
-    print(run(1, test_data))
+    trial = run(1, test_data)
+    print("Done")
 
 
 if __name__ == "__main__":
