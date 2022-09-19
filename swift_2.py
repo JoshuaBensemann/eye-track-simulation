@@ -140,7 +140,11 @@ def run(trial_id, df):
 
     full_data = np.concatenate([meta_data, trial], axis=1)
     word_series = df["word"].squeeze()
-    trial_cols = ["trial_id", "time_stamp", "k", "fixated_word", "event"] + word_series.tolist()
+    if num_words > 1:
+        trial_cols = ["trial_id", "time_stamp", "k", "fixated_word", "event"] + word_series.tolist()
+    else:
+        trial_cols = ["trial_id", "time_stamp", "k", "fixated_word", "event", word_series]
+
     trial_df = pd.DataFrame(full_data[:i+1, :], columns=trial_cols)
 
     dwell_time_series = pd.Series(dwell_time)
