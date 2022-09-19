@@ -5,7 +5,7 @@ import swift_2
 from preprocessing.dataframe import partition_sentences, swift_2_process_df
 from multiprocessing.pool import Pool
 
-trials = 8
+trials = 200
 output_dir = "output/ez-corpus/"
 
 
