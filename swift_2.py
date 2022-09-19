@@ -4,7 +4,7 @@ import pandas as pd
 from models.swift_2 import calculate_process_rate, activation_change, check_for_labile_start, get_saccade_delta, \
     calculate_activation_integral, start_labile_stage, start_nonlabile_stage, start_saccade_execution
 from models.utils import find_fixated_word, find_word_centre
-from preprocessing.dataframe import process_df
+from preprocessing.dataframe import swift_2_process_df
 from preprocessing.swift_2 import process_sentence
 
 max_time = 10000  # ms
@@ -21,7 +21,7 @@ def metadata_step(trial_id, i, k, word_pos):
 
 def trial_step(current_processed, k, word_complete, difficulty, word_pos, word_prob, suppression):
     word_rates = calculate_process_rate(k, word_pos)
-    processed, complete = activation_change(current_processed, word_complete, difficulty, word_pos, word_prob,
+    processed, complete = activation_change(current_processed, k, word_complete, difficulty, word_pos, word_prob,
                                             word_rates, time_step, suppression)
 
     return complete, processed
@@ -43,10 +43,10 @@ def nonlabile_step(time_stamp, current_activations, k, word_pos, current_word):
 
 
 def saccade_step(time_stamp, word_pos, k, current_word, target_word):
-    execution_timer, suppression_delay = start_saccade_execution()
+    execution_timer = start_saccade_execution()
     execution_timer = execution_timer + time_stamp
-    suppression_start = time_stamp + suppression_delay
-    suppression_stop = execution_timer + suppression_delay
+    suppression_start = time_stamp
+    suppression_stop = execution_timer
 
     return execution_timer, suppression_start, suppression_stop
 
@@ -91,6 +91,7 @@ def run(trial_id, df):
 
     trial = np.zeros((simulation_steps, num_words))
     meta_data = np.zeros((simulation_steps, 5))  # trial_id, time_stamp, k, fixated_word, event
+    dwell_time = np.zeros(num_words)
 
     meta_data[0, :] = np.array((trial_id, 0, k, 0, 0))
 
@@ -101,6 +102,10 @@ def run(trial_id, df):
         current_word = int(meta_data[i, 3])
 
         suppression = suppression_start <= time_stamp <= suppression_stop
+
+        if not suppression and current_word < dwell_time.shape[0]:
+            dwell_time[current_word] = dwell_time[current_word] + time_step # add dwell time unless eye is moving
+
         word_complete, trial[i, :] = trial_step(trial[i - 1, :], k, word_complete, difficulty, word_pos, word_prob,
                                                 suppression)
 
@@ -130,19 +135,26 @@ def run(trial_id, df):
                     post_saccade_step(time_stamp, post_saccade_k, target_word, word_pos)
                 meta_data[i, 4] = 4 # end of saccade
                 if check_for_trial_end(word_complete, word_prob):
-                    break
+                    if current_word >= word_complete.shape[0] - 2:
+                        break
 
     full_data = np.concatenate([meta_data, trial], axis=1)
-    return full_data[:i+1, :]
+    word_series = df["word"].squeeze()
+    trial_cols = ["trial_id", "time_stamp", "k", "fixated_word", "event"] + word_series.tolist()
+    trial_df = pd.DataFrame(full_data[:i+1, :], columns=trial_cols)
+
+    dwell_time_series = pd.Series(dwell_time)
+
+    return trial_df, dwell_time_series
 
 
 def test():
     data = pd.read_csv("data/EZ-corpus.csv", header=None, names=["freq", "len", "prob", "word"])
     test_data = data.loc[:11].copy()
 
-    test_data = process_df(test_data)
+    test_data = swift_2_process_df(test_data)
 
-    trial = run(1, test_data)
+    trial, dwell_time = run(1, test_data)
     print("Done")
 
 

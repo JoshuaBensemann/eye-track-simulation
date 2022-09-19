@@ -10,12 +10,12 @@ def find_fixated_word(k, word_pos):
         return word_pos.shape[0]
 
     for i in range(word_pos.shape[0]):
-        if (k >= word_pos[i, 0] - 1) and (k <= word_pos[i, 1]):
+        if (k > word_pos[i, 0] - 2) and (k <= word_pos[i, 1]):
             return i
 
 
 def find_word_centre(word_pos):
-    return int((word_pos[0] + word_pos[1]) / 2)
+    return (word_pos[0] + word_pos[1]) / 2
 
 
 def get_random_time(ave, samples=1):

@@ -107,9 +107,9 @@ def calculate_stochastic_processing(word_rates):
     return stochastic_rates
 
 
-def activation_change(current_processed, word_complete, difficulty, word_pos, word_prob, word_rates,
+def activation_change(current_processed, k, word_complete, difficulty, word_pos, word_prob, word_rates,
                       time_step, suppression):  # Equation 7
-    preprocess_factors = calculate_preprocessing_factor(word_complete, word_pos, word_prob, suppression)
+    preprocess_factors = calculate_preprocessing_factor(word_complete, word_pos-k, word_prob, suppression)
     stochastic_rates = calculate_stochastic_processing(word_rates)
     activations_changes = preprocess_factors * stochastic_rates - global_decay_w
 
@@ -164,7 +164,7 @@ def calculate_saccade_amplitude(k, target_pos, refix):
     random_error = np.random.normal(0, range_error_std, 1)
     actual_amplitude = intended_amplitude + range_error + random_error[0]
 
-    post_saccade_k = k + int(actual_amplitude)
+    post_saccade_k = k + actual_amplitude
 
     return actual_amplitude, post_saccade_k
 
@@ -212,4 +212,4 @@ def start_nonlabile_stage(current_activations, k, word_pos, current_word):
 def start_saccade_execution():
     timer = get_random_time(execution_time)
 
-    return timer, suppression_delay
+    return timer
