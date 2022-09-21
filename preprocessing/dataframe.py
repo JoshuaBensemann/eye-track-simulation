@@ -33,3 +33,9 @@ def swift_2_process_df(df):
     df = pd.concat([df, word_info], axis=1)
     df["ln"] = df["freq"].apply(max_activation)
     return df
+
+
+def get_freq_per_million(word, lang='en', min_value=1):
+    min_value = min_value * 1e-6
+
+    return word_frequency(word, lang, minimum=min_value) * 1e6
