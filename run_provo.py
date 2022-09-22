@@ -1,13 +1,15 @@
 import pandas as pd
 from os import path, makedirs
+from preprocessing.dataframe import partition_sentences, get_freq_per_million
 import training_loops
-from preprocessing.dataframe import partition_sentences
 
-output_dir = "output/ez-corpus/"
+output_dir = "output/provo/"
 
 
 def main():
-    data = pd.read_csv("data/EZ-corpus.csv", header=None, names=["freq", "len", "prob", "word"])
+    data = pd.read_csv("data/provo_data.csv")
+    data["freq"] = data["word"].apply(get_freq_per_million)
+
     if not path.exists(output_dir):
         makedirs(output_dir)
 

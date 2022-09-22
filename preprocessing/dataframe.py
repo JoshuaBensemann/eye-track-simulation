@@ -1,4 +1,6 @@
 import pandas as pd
+from wordfreq import word_frequency
+
 from preprocessing.swift_2 import max_activation
 
 
