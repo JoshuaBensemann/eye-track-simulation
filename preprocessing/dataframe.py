@@ -17,6 +17,25 @@ def partition_sentences(df):
     return sentence_indices
 
 
+def partition_texts(df, id_col="Word_ID"):
+    text_indices = []
+    text_id = None
+    text_start = 0
+
+    for i, row in df.iterrows():
+        current_id = row[id_col].split("_")[0]
+        if text_id is None:
+            text_id = current_id
+        else:
+            if text_id != current_id:
+                text_end = i
+                text_indices.append([text_start, text_end])
+                text_start = text_end
+                text_id = current_id
+
+    return text_indices
+
+
 def swift_2_process_df(df):
     start = 0
     word = 1

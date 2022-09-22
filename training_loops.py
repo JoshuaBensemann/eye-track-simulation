@@ -3,16 +3,16 @@ import swift_2
 from preprocessing.dataframe import swift_2_process_df
 from multiprocessing.pool import Pool
 
-def run_trial(sentence_id, trial_id, df):
+def run_trial(text_id, trial_id, df):
     trial, dwell_time = swift_2.run(trial_id, df)
-    print(f"Sentence {sentence_id} Trial {trial_id} complete")
+    print(f"Text {text_id} Trial {trial_id} complete")
 
     return trial, dwell_time
 
 
-def main(data, sentences, output_dir, trials=200):
+def main(data, text, output_dir, trials=200):
 
-    for sentence_id, sentence in enumerate(sentences):
+    for sentence_id, sentence in enumerate(text):
         with Pool() as pool:
             trial_results = []
             dwell_time_results = []
