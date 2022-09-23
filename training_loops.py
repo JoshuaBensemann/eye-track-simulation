@@ -12,7 +12,7 @@ def run_trial(text_id, trial_id, df):
 
 
 def main(data, text, output_dir, trials=200):
-    num_cpus = min(multiprocessing.cpu_count(), 100)
+    num_cpus = min(multiprocessing.cpu_count(), 50)
 
     for sentence_id, sentence in enumerate(text):
         with Pool(processes=num_cpus) as pool:
