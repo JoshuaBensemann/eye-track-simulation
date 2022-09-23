@@ -1,7 +1,8 @@
+import multiprocessing
 import pandas as pd
 import swift_2
 from preprocessing.dataframe import swift_2_process_df
-from multiprocessing.pool import Pool
+from multiprocessing import Pool
 
 def run_trial(text_id, trial_id, df):
     trial, dwell_time = swift_2.run(trial_id, df)
@@ -11,9 +12,10 @@ def run_trial(text_id, trial_id, df):
 
 
 def main(data, text, output_dir, trials=200):
+    num_cpus = min(multiprocessing.cpu_count(), 100)
 
     for sentence_id, sentence in enumerate(text):
-        with Pool() as pool:
+        with Pool(processes=num_cpus) as pool:
             trial_results = []
             dwell_time_results = []
 
