@@ -12,7 +12,7 @@ global_decay_w = 0.01
 preprocess_factor_f = 70.2
 processing_noise = 2
 inhibition_factor_h = 2.62
-lambda_0 = np.sqrt(2 / np.pi) * 1 / (vis_span_l + vis_span_r)  # Equation 5
+lambda_0 = np.sqrt(2 / np.pi) * (1 / (vis_span_l + vis_span_r))  # Equation 5
 
 random_timing = 179.0
 labile_stage = 108.0
