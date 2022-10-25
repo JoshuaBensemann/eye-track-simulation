@@ -6,7 +6,7 @@ import training_loops
 output_dir = "output/ez-corpus_v2/"
 
 def main():
-    data = pd.read_csv("data/EZ-corpus.csv", header=None, names=["freq", "len", "prob", "word"])
+    data = pd.read_csv("data/csv/schilling_data.csv", header=None, names=["freq", "len", "prob", "word"])
     data = data.drop("freq", axis=1)
     data["freq"] = data["word"].apply(get_freq_per_million)
 

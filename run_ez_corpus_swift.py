@@ -7,7 +7,7 @@ output_dir = "output/ez-corpus/"
 
 
 def main():
-    data = pd.read_csv("data/EZ-corpus.csv", header=None, names=["freq", "len", "prob", "word"])
+    data = pd.read_csv("data/csv/schilling_data.csv", header=None, names=["freq", "len", "prob", "word"])
     if not path.exists(output_dir):
         makedirs(output_dir)
 

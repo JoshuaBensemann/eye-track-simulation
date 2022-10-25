@@ -153,7 +153,7 @@ def run(trial_id, df):
 
 
 def test():
-    data = pd.read_csv("data/EZ-corpus.csv", header=None, names=["freq", "len", "prob", "word"])
+    data = pd.read_csv("data/csv/schilling_data.csv", header=None, names=["freq", "len", "prob", "word"])
     test_data = data.loc[:11].copy()
 
     test_data = swift_2_process_df(test_data)
