@@ -1,10 +1,12 @@
+import os
+
 from preprocessing.dataframe import DataFrameCreator
 
 
 def main():
     data_dir = "data/"
 
-    with open("data/provo.txt", "r") as f:
+    with open("data/schilling et al.txt", "r") as f:
         texts = f.readlines()
 
     with open("models.txt", "r") as f:
@@ -12,7 +14,7 @@ def main():
         print(models)
 
     for model in models:
-        filename = f"{data_dir}provo_{model}.csv"
+        filename = f"{data_dir}schilling_{model}.csv"
         if os.path.isfile(filename):
             continue
 
