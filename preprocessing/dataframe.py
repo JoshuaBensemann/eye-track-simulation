@@ -148,9 +148,12 @@ class DataFrameCreator():
 
         for i, text in enumerate(texts):
             print(f"Converting Text {i+1} of {len(texts)}!")
-            words, tokens, tokens_tensor = words_to_tokens(text, self.tokenizer)
-            word_probs = self.get_probabilities_from_model(words, tokens, tokens_tensor)
-            dfs.append(word_probs_to_dataframe(word_probs, i+1))
+            try:
+                words, tokens, tokens_tensor = words_to_tokens(text, self.tokenizer)
+                word_probs = self.get_probabilities_from_model(words, tokens, tokens_tensor)
+                dfs.append(word_probs_to_dataframe(word_probs, i+1))
+            except:
+                pass
 
         return pd.concat(dfs)
 
