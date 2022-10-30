@@ -19,6 +19,8 @@ def main():
         for model in models:
             filename = f"{input_dir}{text}_{model}.csv"
             data = pd.read_csv(filename)
+            if text == "geco":
+                data.loc[17074, "word"] = "null"
 
             output_dir = f"output/{text}/{model}/"
 
