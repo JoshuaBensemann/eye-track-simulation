@@ -1,3 +1,6 @@
+import os
+import time
+
 import numpy as np
 import pandas as pd
 
@@ -75,6 +78,8 @@ def check_for_trial_end(word_complete, word_prob):
 
 
 def run(trial_id, df):
+    np.random.seed((os.getpid() * int(time.time())) % 123456789)
+
     num_words = df.shape[0]
     post_saccade_k = 0
     prev_saccade_t = 0
