@@ -2,8 +2,9 @@ import pandas as pd
 import numpy as np
 from os import path, scandir, makedirs
 
-file_dir = "output/"
+input_dir = "output/"
 output_dir = "output/synthetic_dt/"
+
 
 def process_dt_data(dt_csv, sentence_csv):
     sentence = pd.read_csv(sentence_csv).columns[5:]
@@ -14,15 +15,13 @@ def process_dt_data(dt_csv, sentence_csv):
     return pd.DataFrame(average)
 
 
+dirs = [f"{item.name}/" for item in scandir(input_dir) if path.isdir(item)]
 
-
-dirs = [f"{item.name}/" for item in scandir(file_dir) if path.isdir(item)]
-
-for current_dir in dirs[0:1]:
-    dir_path = f"{file_dir}/{current_dir}"
+for current_dir in dirs:
+    dir_path = f"{input_dir}/{current_dir}"
     models = [model.name for model in scandir(dir_path) if path.isdir(model)]
 
-    for model in models[0:1]:
+    for model in models:
         ave_dt_data = []
 
         model_path = f"{dir_path}/{model}/"
@@ -30,6 +29,7 @@ for current_dir in dirs[0:1]:
         sentence_data = [f"{model_path}{file.name}" for file in scandir(model_path) if "DT" not in file.name]
 
         for i, dt_csv in enumerate(dt_data):
+            print(dt_csv)
             sentence_csv = sentence_data[i]
             assert dt_csv[-14:] == sentence_csv[-14:]
 
