@@ -3,7 +3,8 @@ import numpy as np
 from os import path, scandir, makedirs
 
 input_dir = "output/"
-output_dir = "output/synthetic_dt/"
+output_name = "synthetic_dt"
+output_dir = f"{input_dir}{output_name}/"
 
 
 def process_dt_data(dt_csv, sentence_csv):
@@ -15,7 +16,8 @@ def process_dt_data(dt_csv, sentence_csv):
     return pd.DataFrame(average)
 
 
-dirs = [f"{item.name}/" for item in scandir(input_dir) if path.isdir(item)]
+dirs = [f"{item.name}/" for item in scandir(input_dir) if path.isdir(item) and item.name != output_name]
+
 
 for current_dir in dirs:
     dir_path = f"{input_dir}/{current_dir}"
@@ -40,9 +42,9 @@ for current_dir in dirs:
         sentence_df.columns = ["word", "mean_dt"]
         sentence_df["word"] = sentence_df["word"].apply(lambda s: s.split("_")[1])
 
-        output_dir = f"{output_dir}/{current_dir}/"
+        output_path = f"{output_dir}/{current_dir}/"
 
-        if not path.exists(output_dir):
-            makedirs(output_dir)
+        if not path.exists(output_path):
+            makedirs(output_path)
 
-        sentence_df.to_csv(f"{output_dir}/{model}.csv", index=False)
+        sentence_df.to_csv(f"{output_path}/{model}.csv", index=False)
