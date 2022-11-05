@@ -3,7 +3,7 @@ from os import path, makedirs
 from preprocessing.dataframe import partition_sentences, get_freq_per_million
 import training_loops
 
-output_dir = "output/provo/"
+output_dir = "output/provo/real/"
 
 
 def main():
