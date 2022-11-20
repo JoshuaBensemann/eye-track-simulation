@@ -20,6 +20,7 @@ def find_end_sentence(word):
     try:
         if word[-1] in [".", "?", "!"]:
             word = f"{word}@"
+
     except Exception:
         word = "null"
 
