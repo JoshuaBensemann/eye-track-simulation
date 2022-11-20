@@ -32,6 +32,7 @@ def convert_to_ez_format(csv_file):
         df["freq"] = df["word"].apply(get_freq_per_million)
 
     df["word"] = df["word"].apply(find_end_sentence)
+    df["len"] = df["len"].astype("int")
     lines = df.apply(df_to_line, axis=1)
 
     return lines.tolist()
